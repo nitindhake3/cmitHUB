@@ -51,18 +51,8 @@ jobs:
             echo "[$TIMESTAMP] Contribution #$i/$COUNT - Event ID: $RANDOM_HEX" >> contributions.log
 
             # 2. Update activity.json
-            cat <<EOF > activity.json
-{
-  "username": "nitindhake3",
-  "email": "178370983+nitindhake3@users.noreply.github.com",
-  "last_commit_timestamp": "$TIMESTAMP",
-  "daily_target": "20-30 commits",
-  "current_batch_step": $i,
-  "total_batch_size": $COUNT,
-  "event_id": "$RANDOM_HEX",
-  "status": "active"
-}
-EOF
+            printf '{\n  "username": "nitindhake3",\n  "email": "178370983+nitindhake3@users.noreply.github.com",\n  "last_commit_timestamp": "%s",\n  "daily_target": "20-30 commits",\n  "current_batch_step": %d,\n  "total_batch_size": %d,\n  "event_id": "%s",\n  "status": "active"\n}\n' "$TIMESTAMP" "$i" "$COUNT" "$RANDOM_HEX" > activity.json
+
 
             # 3. Stage and commit changes individually so each counts on profile
             git add contributions.log activity.json
