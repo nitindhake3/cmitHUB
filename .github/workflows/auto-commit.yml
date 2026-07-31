@@ -31,6 +31,11 @@ jobs:
           git config --global user.email "178370983+nitindhake3@users.noreply.github.com"
 
       - name: Generate Daily Commits (20 to 30)
+        env:
+          GIT_AUTHOR_NAME: "nitindhake3"
+          GIT_AUTHOR_EMAIL: "178370983+nitindhake3@users.noreply.github.com"
+          GIT_COMMITTER_NAME: "nitindhake3"
+          GIT_COMMITTER_EMAIL: "178370983+nitindhake3@users.noreply.github.com"
         run: |
           INPUT_COUNT="${{ github.event.inputs.commit_count }}"
           
@@ -53,10 +58,9 @@ jobs:
             # 2. Update activity.json
             printf '{\n  "username": "nitindhake3",\n  "email": "178370983+nitindhake3@users.noreply.github.com",\n  "last_commit_timestamp": "%s",\n  "daily_target": "20-30 commits",\n  "current_batch_step": %d,\n  "total_batch_size": %d,\n  "event_id": "%s",\n  "status": "active"\n}\n' "$TIMESTAMP" "$i" "$COUNT" "$RANDOM_HEX" > activity.json
 
-
             # 3. Stage and commit changes individually so each counts on profile
             git add contributions.log activity.json
-            git commit -m "chore(activity): log update $i of $COUNT [$TIMESTAMP]"
+            git commit --author="nitindhake3 <178370983+nitindhake3@users.noreply.github.com>" -m "chore(activity): log update $i of $COUNT [$TIMESTAMP]"
             
             # Short pause to ensure unique git timestamps
             sleep 1
