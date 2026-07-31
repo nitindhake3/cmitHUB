@@ -1,0 +1,77 @@
+name: Auto GitHub Profile Contributor
+
+on:
+  schedule:
+    # Runs every day at 12:00 PM UTC (5:30 PM IST)
+    - cron: '0 12 * * *'
+  workflow_dispatch:
+    inputs:
+      commit_count:
+        description: 'Number of commits to make (Leave blank for random 20-30)'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+
+jobs:
+  auto-contribute:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git User (Mandatory for Profile Contribution)
+        run: |
+          git config --global user.name "nitindhake3"
+          git config --global user.email "178370983+nitindhake3@users.noreply.github.com"
+
+      - name: Generate Daily Commits (20 to 30)
+        run: |
+          INPUT_COUNT="${{ github.event.inputs.commit_count }}"
+          
+          if [ -n "$INPUT_COUNT" ]; then
+            COUNT=$INPUT_COUNT
+          else
+            # Generate random number between 20 and 30
+            COUNT=$(( ( RANDOM % 11 ) + 20 ))
+          fi
+
+          echo "Target commit count for today: $COUNT"
+
+          for i in $(seq 1 $COUNT); do
+            TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+            RANDOM_HEX=$(head /dev/urandom | tr -dc 'a-f0-9' | head -c 8)
+            
+            # 1. Update contributions.log
+            echo "[$TIMESTAMP] Contribution #$i/$COUNT - Event ID: $RANDOM_HEX" >> contributions.log
+
+            # 2. Update activity.json
+            cat <<EOF > activity.json
+{
+  "username": "nitindhake3",
+  "email": "178370983+nitindhake3@users.noreply.github.com",
+  "last_commit_timestamp": "$TIMESTAMP",
+  "daily_target": "20-30 commits",
+  "current_batch_step": $i,
+  "total_batch_size": $COUNT,
+  "event_id": "$RANDOM_HEX",
+  "status": "active"
+}
+EOF
+
+            # 3. Stage and commit changes individually so each counts on profile
+            git add contributions.log activity.json
+            git commit -m "chore(activity): log update $i of $COUNT [$TIMESTAMP]"
+            
+            # Short pause to ensure unique git timestamps
+            sleep 1
+          done
+
+      - name: Push All Commits to Repository
+        run: |
+          git push origin main
