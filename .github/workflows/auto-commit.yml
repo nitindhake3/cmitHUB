@@ -48,6 +48,14 @@ jobs:
 
           echo "Target commit count for today: $COUNT"
 
+          START_DATE="2026-07-31"
+          CURRENT_DATE=$(date -u +"%Y-%m-%d")
+          START_SEC=$(date -u -d "$START_DATE" +%s)
+          CURR_SEC=$(date -u -d "$CURRENT_DATE" +%s)
+          DAY_NUM=$(( (CURR_SEC - START_SEC) / 86400 + 1 ))
+
+          echo "Calculated Day: $DAY_NUM"
+
           for i in $(seq 1 $COUNT); do
             TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
             RANDOM_HEX=$(head /dev/urandom | tr -dc 'a-f0-9' | head -c 8)
@@ -60,7 +68,7 @@ jobs:
 
             # 3. Stage and commit changes individually so each counts on profile
             git add contributions.log activity.json
-            git commit --author="nitindhake3 <178370983+nitindhake3@users.noreply.github.com>" -m "chore(activity): log update $i of $COUNT [$TIMESTAMP]"
+            git commit --author="nitindhake3 <178370983+nitindhake3@users.noreply.github.com>" -m "day $DAY_NUM commit $i"
             
             # Short pause to ensure unique git timestamps
             sleep 1
